@@ -298,16 +298,3 @@ This project uses simplified synthetic data. It does not yet include:
 
 The current model is therefore not intended as a production-ready pressure-drop predictor. It is a reproducible first step for connecting fluid mechanics, Python, and machine learning.
 
-## Next Steps
-
-Possible extensions:
-
-- Generate CFD data with OpenFOAM.
-- Compare ML predictions against CFD results.
-- Add noise to simulate measurement uncertainty.
-- Add discharge coefficient corrections.
-- Train additional models such as Linear Regression, Gradient Boosting, or Neural Networks.
-- Add model comparison.
-- Add unit tests.
-- Add GitHub Actions for continuous integration.
-- Add a small interactive dashboard.
