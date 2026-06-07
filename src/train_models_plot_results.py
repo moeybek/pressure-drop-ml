@@ -12,6 +12,7 @@ def evaluate_model(
     model_name: str,
     df: pd.DataFrame,
     feature_columns: list[str],
+    feature_set_name: str,
     target_column: str,
     target_label: str,
 ) -> dict[str, float | str]:
@@ -34,6 +35,7 @@ def evaluate_model(
 
     return {
         "target": target_label,
+        "feature_set": feature_set_name,
         "model": model_name,
         "mae_pa": mae,
         "rmse_pa": rmse,
@@ -51,13 +53,35 @@ def main() -> None:
 
     df = pd.read_csv(data_path)
 
-    feature_columns = [
+    raw_features = [
         "density_kg_m3",
         "viscosity_pa_s",
         "pipe_diameter_m",
         "velocity_m_s",
         "beta",
         "reynolds_number",
+    ]
+
+    physics_informed_features = [
+        "density_kg_m3",
+        "viscosity_pa_s",
+        "pipe_diameter_m",
+        "velocity_m_s",
+        "beta",
+        "reynolds_number",
+        "dynamic_pressure_pa",
+        "loss_coefficient",
+    ]
+
+    feature_sets = [
+        {
+            "name": "Raw features",
+            "columns": raw_features,
+        },
+        {
+            "name": "Raw + physics-informed features",
+            "columns": physics_informed_features,
+        },
     ]
 
     targets = [
@@ -98,16 +122,18 @@ def main() -> None:
     results = []
 
     for target in targets:
-        for model_config in models:
-            result = evaluate_model(
-                model=model_config["model"],
-                model_name=model_config["name"],
-                df=df,
-                feature_columns=feature_columns,
-                target_column=target["column"],
-                target_label=target["label"],
-            )
-            results.append(result)
+        for feature_set in feature_sets:
+            for model_config in models:
+                result = evaluate_model(
+                    model=model_config["model"],
+                    model_name=model_config["name"],
+                    df=df,
+                    feature_columns=feature_set["columns"],
+                    feature_set_name=feature_set["name"],
+                    target_column=target["column"],
+                    target_label=target["label"],
+                )
+                results.append(result)
 
     results_df = pd.DataFrame(results)
 

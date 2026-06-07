@@ -6,6 +6,8 @@ The goal is to connect mechanical engineering, fluid mechanics, Python automatio
 
 The synthetic dataset represents a water-like incompressible fluid. The sampled density range is 950–1050 kg/m³ and the dynamic viscosity range is 0.0007–0.0013 Pa·s.
 
+Adding physics-informed features improved model performance, especially for Linear Regression. The R² score of Linear Regression increased from about 0.19 to about 0.67 for both clean and noisy targets. Random Forest remained the best-performing model overall, with the physics-informed feature set achieving the lowest errors and highest R² values. This shows that physics-based feature engineering can make the learning problem easier, especially for simpler models.
+
 ## Schematic
 
 ![Pressure drop schematic](assets/pressure_drop_schematic.png)

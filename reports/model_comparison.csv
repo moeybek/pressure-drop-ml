@@ -1,7 +1,13 @@
-target,model,mae_pa,rmse_pa,r2
-Clean pressure drop,Linear Regression,97708.95190185943,158881.64140315537,0.19081889183137657
-Clean pressure drop,Random Forest,2094.034062952358,5645.065975643895,0.9989785047696381
-Clean pressure drop,Gradient Boosting,4738.0627564567085,7868.928585336424,0.9980151417039921
-Noisy pressure drop,Linear Regression,97523.08750572917,158310.17911280473,0.19034433352711877
-Noisy pressure drop,Random Forest,6061.490271436891,16002.854767312223,0.9917267222083633
-Noisy pressure drop,Gradient Boosting,7814.26264020127,16452.567590200473,0.9912551966746115
+target,feature_set,model,mae_pa,rmse_pa,r2
+Clean pressure drop,Raw features,Linear Regression,97708.95190185941,158881.64140315537,0.19081889183137646
+Clean pressure drop,Raw features,Random Forest,2099.066839376834,5658.744603824524,0.9989735483768668
+Clean pressure drop,Raw features,Gradient Boosting,4738.062756456708,7868.9285853364245,0.9980151417039921
+Clean pressure drop,Raw + physics-informed features,Linear Regression,67547.8966908294,101728.00547686155,0.6682741173570306
+Clean pressure drop,Raw + physics-informed features,Random Forest,1373.5373489404933,4075.726563889176,0.9994675137730279
+Clean pressure drop,Raw + physics-informed features,Gradient Boosting,4544.000301497156,7723.791852849018,0.9980876850416147
+Noisy pressure drop,Raw features,Linear Regression,97523.08750572916,158310.17911280473,0.19034433352711877
+Noisy pressure drop,Raw features,Random Forest,6051.788317324851,15986.097266829127,0.9917440399769702
+Noisy pressure drop,Raw features,Gradient Boosting,7814.262640201269,16452.567590200473,0.9912551966746115
+Noisy pressure drop,Raw + physics-informed features,Linear Regression,67466.3816647914,101625.32784243234,0.6663534807644282
+Noisy pressure drop,Raw + physics-informed features,Random Forest,5891.378850752884,15672.26142928861,0.9920650167523095
+Noisy pressure drop,Raw + physics-informed features,Gradient Boosting,7756.3664435131905,16611.32477803818,0.9910856184613441

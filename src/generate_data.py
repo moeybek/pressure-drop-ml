@@ -17,13 +17,21 @@ def generate_pressure_drop_data(
     beta = rng.uniform(0.3, 0.8, n_samples)              # d / D
 
     reynolds_number = density * velocity * pipe_diameter / viscosity
+
+    # Physics-informed features
+    dynamic_pressure = 0.5 * density * velocity**2
     loss_coefficient = (1 / beta**4) - 1
-    #pressure_drop = loss_coefficient * 0.5 * density * velocity**2
-    pressure_drop_clean = loss_coefficient * 0.5 * density * velocity**2
-    noise = rng.normal(0,
-                       scale=0.07 * pressure_drop_clean,  # 7% noise
-                       size=n_samples)
-    pressure_drop = pressure_drop_clean + noise
+
+    # Clean pressure-drop target
+    pressure_drop_clean = loss_coefficient * dynamic_pressure
+
+    # Noisy pressure-drop target
+    noise = rng.normal(
+        loc=0.0,
+        scale=0.07 * pressure_drop_clean,
+        size=n_samples,
+    )
+    pressure_drop_noisy = pressure_drop_clean + noise
 
     return pd.DataFrame(
         {
@@ -33,10 +41,11 @@ def generate_pressure_drop_data(
             "velocity_m_s": velocity,
             "beta": beta,
             "reynolds_number": reynolds_number,
+            "dynamic_pressure_pa": dynamic_pressure,
             "loss_coefficient": loss_coefficient,
             "pressure_drop_clean_pa": pressure_drop_clean,
-            "pressure_drop_noisy_pa": pressure_drop,
             "noise_pa": noise,
+            "pressure_drop_noisy_pa": pressure_drop_noisy,
         }
     )
 
