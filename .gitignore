@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ----------------------------
+# Project-specific ignores
+# ----------------------------
+
+# Generated datasets
+data/generated/
+*.csv
+
+# Generated plots / exported figures
+reports/figures/
+figures/generated/
+
+# OS files
+.DS_Store
