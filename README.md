@@ -3,6 +3,7 @@
 This project predicts pressure drop in internal flow across a pipe/orifice-like restriction using engineering-based synthetic data and a machine learning regression model.
 
 The goal is to connect mechanical engineering, fluid mechanics, Python automation, and machine learning in one reproducible workflow.
+The synthetic dataset represents a water-like incompressible fluid. The sampled density range is 950–1050 kg/m³ and the dynamic viscosity range is 0.0007–0.0013 Pa·s.
 
 ## Schematic
 
