@@ -223,11 +223,10 @@ __marimo__/
 
 # Generated datasets
 data/generated/
-*.csv
 
 # Generated plots / exported figures
-reports/figures/
 figures/generated/
+reports/figures/
 
-# OS files
+# Local OS files
 .DS_Store
