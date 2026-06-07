@@ -7,7 +7,6 @@ The goal is to connect mechanical engineering, fluid mechanics, Python automatio
 ## Schematic
 
 ![Pressure drop schematic](assets/pressure_drop_schematic.png)
-
 The modeled system is a pipe with a local restriction. The flow enters with velocity \(v\), passes through an orifice with diameter \(d\), and experiences a pressure drop \(\Delta p\).
 
 ```text
