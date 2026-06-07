@@ -28,7 +28,7 @@ def main() -> None:
         "reynolds_number",
     ]
 
-    target_column = "pressure_drop_pa"
+    target_column = "pressure_drop_pa"  # Use clean pressure drop for plotting
 
     X = df[feature_columns]
     y = df[target_column]
