@@ -1,8 +1,9 @@
 # Pressure Drop Prediction with Python and Machine Learning
 
-This project predicts pressure drop in internal flow across a pipe/orifice-like restriction using engineering-based synthetic data and a machine learning regression model.
+This project predicts pressure drop in internal flow across a pipe/orifice-like restriction using engineering-based synthetic data and machine learning regression models.
 
-The goal is to connect mechanical engineering, fluid mechanics, Python automation, and machine learning in one reproducible workflow.
+The goal is to connect mechanical engineering, fluid mechanics, Python automation, data generation, model training, model comparison, visualization, and engineering interpretation in one reproducible workflow.
+
 The synthetic dataset represents a water-like incompressible fluid. The sampled density range is 950–1050 kg/m³ and the dynamic viscosity range is 0.0007–0.0013 Pa·s.
 
 ## Schematic
@@ -71,9 +72,14 @@ where:
 
 Given flow and geometry parameters, the objective is to predict the pressure drop across a pipe/orifice-like restriction.
 
+The project includes two target variables:
+
+- Clean pressure drop calculated directly from the engineering equation
+- Noisy pressure drop created by adding random noise to simulate measurement or simulation uncertainty
+
 ## Inputs
 
-The machine learning model uses the following input features:
+The machine learning models use the following input features:
 
 - Fluid density
 - Dynamic viscosity
@@ -82,11 +88,13 @@ The machine learning model uses the following input features:
 - Orifice diameter ratio
 - Reynolds number
 
-## Output
+## Outputs
 
-The target variable is:
+The generated dataset contains:
 
-- Pressure drop [Pa]
+- Clean pressure drop [Pa]
+- Added noise [Pa]
+- Noisy pressure drop [Pa]
 
 ## Dataset
 
@@ -94,38 +102,47 @@ The dataset is synthetically generated using engineering equations.
 
 Each row represents one operating condition with randomly sampled fluid and geometry parameters.
 
-The target value, pressure drop, is calculated from the simplified physical equation:
+The clean pressure-drop target is calculated from the simplified physical equation:
 
 ```text
-Δp = K · 0.5 · ρ · v²
+Δp_clean = K · 0.5 · ρ · v²
 ```
+
+A noisy pressure-drop target is then created by adding random noise:
+
+```text
+Δp_noisy = Δp_clean + noise
+```
+
+The noise is added to make the dataset slightly more realistic. Real engineering data often contains uncertainty from measurement errors, numerical errors, operating fluctuations, or sensor noise.
 
 This makes the dataset useful for building a first reproducible workflow before moving to CFD-generated or experimental data.
 
-## Machine Learning Model
+## Machine Learning Models
 
-A Random Forest regression model is trained to predict pressure drop from the generated input features.
+Three regression models are trained and compared:
 
-The model learns the relationship between:
+1. Linear Regression
+2. Random Forest Regressor
+3. Gradient Boosting Regressor
 
-- velocity
-- restriction ratio
-- density
-- Reynolds number
-- pipe diameter
-- viscosity
+Each model is trained twice:
 
-and the resulting pressure drop.
+1. Once using the clean pressure-drop target
+2. Once using the noisy pressure-drop target
 
-## Results
+This allows comparison between model behavior on ideal data and more realistic noisy data.
 
-The baseline model achieved the following performance:
+## Model Comparison Results
 
-| Metric | Value |
-|---|---:|
-| MAE | 3670.92 Pa |
-| RMSE | 10267.12 Pa |
-| R² | 0.9971 |
+| Target | Model | MAE [Pa] | RMSE [Pa] | R² |
+|---|---|---:|---:|---:|
+| Clean pressure drop | Linear Regression | 97,708.95 | 158,881.64 | 0.1908 |
+| Clean pressure drop | Random Forest | 2,094.03 | 5,645.07 | 0.9990 |
+| Clean pressure drop | Gradient Boosting | 4,738.06 | 7,868.93 | 0.9980 |
+| Noisy pressure drop | Linear Regression | 97,523.09 | 158,310.18 | 0.1903 |
+| Noisy pressure drop | Random Forest | 6,061.49 | 16,002.85 | 0.9917 |
+| Noisy pressure drop | Gradient Boosting | 7,814.26 | 16,452.57 | 0.9913 |
 
 ## Metric Interpretation
 
@@ -135,13 +152,13 @@ MAE stands for Mean Absolute Error.
 
 It describes the average absolute prediction error.
 
-In this project:
+Example:
 
 ```text
-MAE = 3670.92 Pa
+MAE = 6061.49 Pa
 ```
 
-This means that, on average, the model prediction differs from the formula-based pressure-drop value by about 3671 Pa.
+This means that, on average, the model prediction differs from the target pressure-drop value by about 6061 Pa.
 
 ### RMSE
 
@@ -149,63 +166,113 @@ RMSE stands for Root Mean Squared Error.
 
 It also measures prediction error, but it penalizes large errors more strongly than MAE.
 
-In this project:
-
-```text
-RMSE = 10267.12 Pa
-```
-
-The RMSE is larger than the MAE, which means that some high-pressure-drop cases have larger prediction errors.
+A large difference between MAE and RMSE means that some individual predictions have much larger errors.
 
 ### R²
 
 R² measures how much of the target variation is explained by the model.
 
-In this project:
+Example:
 
 ```text
-R² = 0.9971
+R² = 0.9917
 ```
 
-This means that the model explains about 99.71% of the pressure-drop variation.
+This means that the model explains about 99.17% of the pressure-drop variation.
 
 ## Engineering Interpretation
 
-The model learned the pressure-drop behavior very well.
+The results show that Linear Regression performs poorly, while Random Forest and Gradient Boosting perform very well.
+
+This is physically reasonable.
+
+Linear Regression tries to fit a straight-line relationship:
+
+```text
+pressure_drop = a·density + b·viscosity + c·diameter + d·velocity + e·beta + ...
+```
+
+But the real pressure-drop relation is nonlinear:
+
+```text
+Δp = K · 0.5 · ρ · v²
+K = 1 / β⁴ - 1
+```
+
+The pressure drop depends strongly on:
+
+```text
+v²
+```
+
+and on:
+
+```text
+1 / β⁴
+```
+
+A simple linear model cannot capture this nonlinear behavior well.
+
+Tree-based models such as Random Forest and Gradient Boosting can capture nonlinear relationships more effectively. They can learn behavior such as:
+
+```text
+if beta is small and velocity is high, pressure drop becomes very high
+```
+
+This matches the physical behavior of the simplified pressure-drop equation.
+
+## Feature Importance Interpretation
 
 The most important features are:
 
 1. Beta
 2. Velocity
 
-This is physically reasonable because pressure drop depends strongly on the dynamic pressure term:
+This is physically consistent with the pressure-drop equation.
+
+Beta controls the loss coefficient:
 
 ```text
-v²
+K = 1 / β⁴ - 1
 ```
 
-and on the restriction term:
+Velocity controls the dynamic pressure term:
 
 ```text
-1 / β⁴
+0.5 · ρ · v²
 ```
 
 A smaller beta value means a smaller orifice opening relative to the pipe diameter. This creates a stronger restriction and therefore a much higher pressure drop.
 
 Velocity is also important because pressure drop increases approximately with the square of velocity.
 
-Density contributes directly through the dynamic pressure term.
+Density contributes directly through the dynamic pressure term, but its influence is smaller because only a narrow water-like density range is sampled.
 
-Viscosity and pipe diameter mainly affect the Reynolds number in this simplified setup, but they do not directly appear in the pressure-drop equation used to generate the target value.
+Viscosity and pipe diameter mainly affect the Reynolds number in this simplified setup, but they do not directly appear in the pressure-drop equation used to generate the target value. Therefore, their model importance is low.
+
+## Clean vs Noisy Target Interpretation
+
+The clean target is easier for the models to learn because it comes directly from a deterministic engineering equation.
+
+The noisy target is harder because random noise is added to the clean pressure-drop values.
+
+As expected:
+
+- The noisy target has higher MAE.
+- The noisy target has higher RMSE.
+- The noisy target has lower R².
+
+This behavior is realistic because real engineering data is rarely perfectly clean.
 
 ## Workflow
 
 1. Generate engineering-based synthetic data.
-2. Explore and visualize the dataset.
-3. Train a regression model.
-4. Compare ML predictions against formula-based values.
-5. Visualize prediction errors.
-6. Interpret the results from an engineering perspective.
+2. Add noise to create a more realistic target.
+3. Explore and visualize the dataset.
+4. Train multiple regression models.
+5. Compare model performance on clean and noisy targets.
+6. Generate evaluation plots.
+7. Interpret the results from an engineering perspective.
 
 ## How to Run
 
@@ -228,7 +295,7 @@ Generate the dataset:
 python src/generate_data.py
 ```
 
-Train the model:
+Train and compare the models:
 
 ```bash
 python src/train_model.py
@@ -258,13 +325,13 @@ pressure-drop-ml/
 │   └── 01_data_exploration.ipynb
 │
 ├── reports/
+│   ├── model_comparison.csv
 │   └── model_interpretation.md
 │
 ├── src/
 │   ├── __init__.py
 │   ├── generate_data.py
-│   ├── train_model.py
-│   └── plot_results.py
+│   └── train_models_plot_results.py
 │
 ├── tests/
 ├── requirements.txt
@@ -272,13 +339,23 @@ pressure-drop-ml/
 └── .gitignore
 ```
 
+## Generated Outputs
+
+The project can generate:
+
+- Synthetic pressure-drop dataset
+- Model comparison table
+- Actual vs predicted pressure-drop plots
+- Residual plots
+- Feature-importance plots
+
 ## Generated Plots
 
-The project generates the following plots:
+The project generates plots such as:
 
-- Actual vs predicted pressure drop
-- Residuals vs predicted pressure drop
-- Feature importance
+- Actual vs predicted pressure drop for clean and noisy targets
+- Residuals vs predicted pressure drop for clean and noisy targets
+- Feature importance comparison between clean and noisy targets
 - Velocity vs pressure drop
 
 These plots help evaluate both the machine learning performance and the physical behavior of the generated dataset.
@@ -294,8 +371,8 @@ This project uses simplified synthetic data. It does not yet include:
 - compressibility
 - discharge coefficient corrections
 - complex geometry effects
-- measurement noise
+- realistic sensor behavior
 - uncertainty quantification
+- model deployment
 
 The current model is therefore not intended as a production-ready pressure-drop predictor. It is a reproducible first step for connecting fluid mechanics, Python, and machine learning.
-

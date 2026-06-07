@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def generate_pressure_drop_data(
-    n_samples: int = 5000,
+    n_samples: int = 20000,
     random_seed: int = 42,
 ) -> pd.DataFrame:
     rng = np.random.default_rng(random_seed)
@@ -21,7 +21,7 @@ def generate_pressure_drop_data(
     #pressure_drop = loss_coefficient * 0.5 * density * velocity**2
     pressure_drop_clean = loss_coefficient * 0.5 * density * velocity**2
     noise = rng.normal(0,
-                       scale=0.05 * pressure_drop_clean,  # 5% noise
+                       scale=0.07 * pressure_drop_clean,  # 7% noise
                        size=n_samples)
     pressure_drop = pressure_drop_clean + noise
 

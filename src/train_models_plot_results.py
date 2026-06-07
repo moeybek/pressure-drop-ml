@@ -1,12 +1,15 @@
 from pathlib import Path
 
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
 
-def train_and_evaluate(
+def evaluate_model(
+    model,
+    model_name: str,
     df: pd.DataFrame,
     feature_columns: list[str],
     target_column: str,
@@ -22,12 +25,6 @@ def train_and_evaluate(
         random_state=42,
     )
 
-    model = RandomForestRegressor(
-        n_estimators=200,
-        random_state=42,
-        n_jobs=-1,
-    )
-
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
@@ -37,6 +34,7 @@ def train_and_evaluate(
 
     return {
         "target": target_label,
+        "model": model_name,
         "mae_pa": mae,
         "rmse_pa": rmse,
         "r2": r2,
@@ -62,20 +60,54 @@ def main() -> None:
         "reynolds_number",
     ]
 
-    results = [
-        train_and_evaluate(
-            df=df,
-            feature_columns=feature_columns,
-            target_column="pressure_drop_clean_pa",
-            target_label="Clean pressure drop",
-        ),
-        train_and_evaluate(
-            df=df,
-            feature_columns=feature_columns,
-            target_column="pressure_drop_noisy_pa",
-            target_label="Noisy pressure drop",
-        ),
+    targets = [
+        {
+            "column": "pressure_drop_clean_pa",
+            "label": "Clean pressure drop",
+        },
+        {
+            "column": "pressure_drop_noisy_pa",
+            "label": "Noisy pressure drop",
+        },
     ]
+
+    models = [
+        {
+            "name": "Linear Regression",
+            "model": LinearRegression(),
+        },
+        {
+            "name": "Random Forest",
+            "model": RandomForestRegressor(
+                n_estimators=200,
+                random_state=42,
+                n_jobs=-1,
+            ),
+        },
+        {
+            "name": "Gradient Boosting",
+            "model": GradientBoostingRegressor(
+                n_estimators=200,
+                learning_rate=0.05,
+                max_depth=3,
+                random_state=42,
+            ),
+        },
+    ]
+
+    results = []
+
+    for target in targets:
+        for model_config in models:
+            result = evaluate_model(
+                model=model_config["model"],
+                model_name=model_config["name"],
+                df=df,
+                feature_columns=feature_columns,
+                target_column=target["column"],
+                target_label=target["label"],
+            )
+            results.append(result)
 
     results_df = pd.DataFrame(results)
 
